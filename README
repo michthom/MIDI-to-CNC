@@ -1,0 +1,71 @@
+THIS PROGRAM COMES WITH NO WARRANTY
+PLEASE KEEP AN EYE ON YOUR MACHINE AS THE
+GENERATED CODE MAY BRING YOUR BUILD PLATFORM OFF LIMITS
+
+usage: mid2cnc.py [-h] [-infile [INFILE]] [-channels N [N ...]]
+                  [-outfile [OUTFILE]]
+                  [-machine {cupcake,custom,shapercube,thingomatic,ultimaker}]
+                  [-units {imperial,metric}] [-ppu XXX.XX YYY.YY ZZZ.ZZ]
+                  [-safemin XXX.XX YYY.YY ZZZ.ZZ]
+                  [-safemax XXX.XX YYY.YY ZZZ.ZZ] [-prefix [PRE_FILE]]
+                  [-postfix [POST_FILE]] [-axes XYZ] [-verbose]
+
+Utility to process a Standard MIDI File (*.SMF/*.mid) to "play" it on up to 3
+axes of a CNC machine.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Input settings:
+  -infile [INFILE], --infile [INFILE]
+                        the input MIDI filename (default: ./input.mid)
+  -channels N [N ...], --channels N [N ...]
+                        list of MIDI channels you want to scan for event data
+                        (default: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                        13, 14, 15])
+  -outfile [OUTFILE], --outfile [OUTFILE]
+                        the output Gcode filename (default: ./output.gcode)
+
+Machine settings:
+  -machine {cupcake,custom,shapercube,thingomatic,ultimaker}, --machine {cupcake,custom,shapercube,thingomatic,ultimaker}
+                        sets everything up appropriately for predefined
+                        machines, or flags use of custom settings. (default:
+                        cupcake)
+
+Customised settings:
+  -units {imperial,metric}, --units {imperial,metric}
+                        set the measurement and feed rate units to your
+                        preferred scheme. (default: metric)
+  -ppu XXX.XX YYY.YY ZZZ.ZZ, --ppu XXX.XX YYY.YY ZZZ.ZZ
+                        set arbitrary pulses-per-unit (ppu) for each of the X,
+                        Y and Z axes (default: None)
+  -safemin XXX.XX YYY.YY ZZZ.ZZ, --safemin XXX.XX YYY.YY ZZZ.ZZ
+                        set minimum edge of the safe envelope for each of the
+                        X, Y and Z axes (default: None)
+  -safemax XXX.XX YYY.YY ZZZ.ZZ, --safemax XXX.XX YYY.YY ZZZ.ZZ
+                        set maximum edge of the safe envelope for each of the
+                        X, Y and Z axes (default: None)
+  -prefix [PRE_FILE], --prefix [PRE_FILE]
+                        A file containing Gcode to set your machine to a known
+                        state before the MIDI is played e.g. homing the axes
+                        if supported or required. (default: None)
+  -postfix [POST_FILE], --postfix [POST_FILE]
+                        A file containing Gcode to return your machine to a
+                        known state after the MIDI is played e.g. homing the
+                        axes if supported or required. (default: None)
+
+Output settings:
+  -axes XYZ, --axes XYZ
+                        ordered list of the axes you wish to "play" the MIDI
+                        data on. e.g. "X", "ZY", "YZX" (default: XYZ)
+  -verbose, --verbose   print verbose output to the terminal (default: False)
+
+=================================================================
+Please join our Mailinglist at:
+http://groups.google.com/group/makerbotmusic
+
+and post your working tunes to the MakerBot Wiki:
+http://wiki.makerbot.com/makerbot-music
+=================================================================
+
+Have fun and set all axes to MUSICCCCC!
