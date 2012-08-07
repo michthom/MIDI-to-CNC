@@ -519,7 +519,7 @@ def main(argv):
                     y_dir = y_dir * -1
                 y = (y + (distance_xyz[1] * y_dir))
                
-                if reached_limit( x, distance_xyz[0], x_dir, args.safemin[0], args.safemax[0] ):
+                if reached_limit( z, distance_xyz[2], z_dir, args.safemin[2], args.safemax[2] ):
                     z_dir = z_dir * -1
                 z = (z + (distance_xyz[2] * z_dir))
                
