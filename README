@@ -9,6 +9,7 @@ usage: mid2cnc.py [-h] [-infile [INFILE]] [-channels N [N ...]]
                   [-safemin XXX.XX YYY.YY ZZZ.ZZ]
                   [-safemax XXX.XX YYY.YY ZZZ.ZZ] [-prefix [PRE_FILE]]
                   [-postfix [POST_FILE]] [-axes XYZ] [-verbose]
+                  [-transpose Nx Ny Nz]
 
 Utility to process a Standard MIDI File (*.SMF/*.mid) to "play" it on up to 3
 axes of a CNC machine.
@@ -58,6 +59,8 @@ Output settings:
   -axes XYZ, --axes XYZ
                         ordered list of the axes you wish to "play" the MIDI
                         data on. e.g. "X", "ZY", "YZX" (default: XYZ)
+  -transpose Nx Ny Nz, --transpose Nx Ny Nz
+                        Transposes each axis N keys up/down the scale, e.g. 12 0 0 will raise the X axis one octave.
   -verbose, --verbose   print verbose output to the terminal (default: False)
 
 =================================================================
