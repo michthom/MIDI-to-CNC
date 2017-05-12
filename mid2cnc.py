@@ -487,7 +487,7 @@ def main(argv):
                 # 2 to the power (69-69) / 12 * 440 = A4 440Hz
                 # 2 to the power (64-69) / 12 * 440 = E4 329.627Hz
                 #
-                freq_xyz[j] = pow(2.0, (nownote-69 + args.transpose[j])/12.0)*440.0
+                freq_xyz[j] = pow(2.0, (nownote-69 + int(args.transpose[j]))/12.0)*440.0
 
                 # Here is where we need smart per-axis feed conversions
                 # to enable use of X/Y *and* Z on a Makerbot
