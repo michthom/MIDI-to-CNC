@@ -63,6 +63,9 @@ Output settings:
                         Transposes each axis N keys up/down the scale, e.g. 12 0 0 will raise the X axis one octave.
   -verbose, --verbose   print verbose output to the terminal (default: False)
 
+Midiparser.py is old and cludgy and fail to process some files. You may want to use python-midi by just providing -pymidi option,
+but then you would need to install it manually from https://github.com/vishnubob/python-midi,
+
 =================================================================
 Please join our Mailinglist at:
 http://groups.google.com/group/makerbotmusic
