@@ -39,6 +39,9 @@ import sys
 import os.path
 import math
 
+# Import the MIDI parser code from the subdirectory './lib'
+import midi as midiparser
+
 active_axes = 3
 
 # Specifications for some machines (Need verification!)
@@ -166,14 +169,6 @@ input.add_argument(
     help    = 'the input MIDI filename'
 )
 
-
-input.add_argument(
-    '-pymidi', '--pymidi',
-    default = False,
-    action  = 'store_true',
-    help    = 'use python-midi instead of midiparser.py (parses files midiparser.py does not)'
-)
-
 input.add_argument(
     '-channels', '--channels',
     default = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -278,10 +273,6 @@ output.add_argument(
 
 args = parser.parse_args()
 
-# Import the MIDI parser code from the subdirectory './lib'
-if args.pymidi: import lib.midicludge as midiparser
-else: import lib.midiparser as midiparser
-
 # Get the chosen measurement scheme and the machine definition from the
 # dictionaries defined above
 #
@@ -365,61 +356,62 @@ def main(argv):
     y_dir=1.0;
     z_dir=1.0;
 
-    midi = midiparser.File(args.infile.name)
+    midi = midiparser.read_midifile(args.infile.name)
+    midi.make_ticks_abs()
     
     print "\nMIDI file:\n    %s" % os.path.basename(args.infile.name)
     print "MIDI format:\n    %d" % midi.format
-    print "Number of tracks:\n    %d" % midi.num_tracks
-    print "Timing division:\n    %d" % midi.division
+    print "Number of tracks:\n    %d" % len(midi)
+    print "Timing division:\n    %d" % midi.resolution
 
     noteEventList=[]
     all_channels=set()
 
-    for track in midi.tracks:
+    for track in midi:
         channels=set()
-        for event in track.events:
-            if event.type == midiparser.meta.SetTempo:
-                tempo=event.detail.tempo
+        for event in track:
+            if isinstance(event,midiparser.SetTempoEvent):
+                tempo=event.get_mpqn()
                 if args.verbose:
-                    print "Tempo change: " + str(event.detail.tempo)
-            if ((event.type == midiparser.voice.NoteOn) and (event.channel in args.channels)): # filter undesired instruments
+                    print "Tempo change: " + str(event.get_mpqn())
+            if (isinstance(event,midiparser.NoteOnEvent) and (event.channel in args.channels)): # filter undesired instruments
 
                 if event.channel not in channels:
                     channels.add(event.channel)
 
                 # NB: looks like some use "note on (vel 0)" as equivalent to note off, so check for vel=0 here and treat it as a note-off.
-                if event.detail.velocity > 0:
-                    noteEventList.append([event.absolute, 1, event.detail.note_no, event.detail.velocity])
+                if event.velocity > 0:
+                    noteEventList.append([event.tick, 1, event.pitch, event.velocity])
                     if args.verbose:
-                        print("Note on  (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.absolute, event.channel, event.detail.note_no, event.detail.velocity) )
+                        print("Note on  (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.tick, event.channel, event.pitch, event.velocity) )
                 else:
-                    noteEventList.append([event.absolute, 0, event.detail.note_no, event.detail.velocity])
+                    noteEventList.append([event.tick, 0, event.pitch, event.velocity])
                     if args.verbose:
-                        print("Note off (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.absolute, event.channel, event.detail.note_no, event.detail.velocity) )
-            if (event.type == midiparser.voice.NoteOff) and (event.channel in args.channels):
+                        print("Note off (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.tick, event.channel, event.pitch, event.velocity) )
+            if isinstance(event,midiparser.NoteOffEvent) and (event.channel in args.channels):
 
                 if event.channel not in channels:
                     channels.add(event.channel)
 
-                noteEventList.append([event.absolute, 0, event.detail.note_no, event.detail.velocity])
+                noteEventList.append([event.tick, 0, event.pitch, event.velocity])
                 if args.verbose:
-                    print("Note off (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.absolute, event.channel, event.detail.note_no, event.detail.velocity) )
-            if event.type == midiparser.meta.TrackName: 
+                    print("Note off (time, channel, note, velocity) : %6i %6i %6i %6i" % (event.tick, event.channel, event.pitch, event.velocity) )
+            if isinstance(event,midiparser.TrackNameEvent): 
                 if args.verbose:
-                    print event.detail.text.strip()
-            if event.type == midiparser.meta.CuePoint: 
-                if args.verbose:
-                    print event.detail.text.strip()
-            if event.type == midiparser.meta.Lyric: 
-                if args.verbose:
-                    print event.detail.text.strip()
+                    print event.text.strip()
+#            if event.type == midiparser.meta.CuePoint: 
+#                if args.verbose:
+#                    print event.detail.text.strip()
+#            if event.type == midiparser.meta.Lyric: 
+#                if args.verbose:
+#                    print event.detail.text.strip()
                 #if event.type == midiparser.meta.KeySignature: 
                 # ...
 
         # Finished with this track
         if len(channels) > 0:
             msg=', ' . join(['%2d' % ch for ch in sorted(channels)])
-            print 'Processed track %d, containing channels numbered: [%s ]' % (track.number, msg)
+            # print 'Processed track %d, containing channels numbered: [%s ]' % (track.number, msg)
             all_channels = all_channels.union(channels)
 
     # List all channels encountered
@@ -509,7 +501,7 @@ def main(argv):
                 feed_xyz[j] = ( freq_xyz[j] * 60.0 ) / args.ppu[j]
 
                 # Get the duration in seconds from the MIDI values in divisions, at the given tempo
-                duration = ( ( ( note[0] - last_time ) + 0.0 ) / ( midi.division + 0.0 ) * ( tempo / 1000000.0 ) )
+                duration = ( ( ( note[0] - last_time ) + 0.0 ) / ( midi.resolution + 0.0 ) * ( tempo / 1000000.0 ) )
 
                 # Get the actual relative distance travelled per axis in mm
                 distance_xyz[j] = ( feed_xyz[j] * duration ) / 60.0 
