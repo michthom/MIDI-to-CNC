@@ -547,12 +547,13 @@ def main(argv):
                 args.outfile.write("G01 X%.10f Y%.10f Z%.10f F%.10f\n" % (x, y, z, combined_feedrate))
 
             else:
-                # Handle 'rests' in addition to notes.
-                # How standard is this pause gcode, anyway?
-                args.outfile.write("G04 P%0.4f\n" % duration )
-                if args.verbose:
-                    print "Pause for %.2f seconds" % duration
-                    print "G04 P%0.4f\n" % duration
+                if duration > 0:
+                    # Handle 'rests' in addition to notes.
+                    # How standard is this pause gcode, anyway?
+                    args.outfile.write("G04 P%0.4f\n" % duration )
+                    if args.verbose:
+                        print "Pause for %.2f seconds" % duration
+                        print "G04 P%0.4f\n" % duration
 
             # finally, set this absolute time as the new starting time
             last_time = note[0]
